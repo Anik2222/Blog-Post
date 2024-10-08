@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
 const User = require('../models/User');
+const Message = require('../models/Message');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -198,7 +199,7 @@ router.get('/edit-post/:id', authMiddleware, async (req, res) => {
  * PUT /
  * Admin - Create New Post
  */
-router.put('/edit-post/:id', authMiddleware, async (req, res) => {
+router.post('/edit-post/:id', authMiddleware, async (req, res) => {
 
     try {
 
@@ -288,14 +289,42 @@ router.get('/logout', (req, res) => {
 //GET
 //Admin - Contact
 
-router.post('/contact', (req, res) => {
+// router.post('/contact', (req, res) => {
+//     const { name, email, message } = req.body;
+
+//     // Here, you could add functionality to send the data to an email, save it to a database, etc.
+//     console.log(`Message received from ${name} (${email}): ${message}`);
+
+//     res.send('Thank you for your message!'); // You can render a thank-you page or redirect back to /contact
+// });
+
+router.post('/contact', async (req, res) => {
     const { name, email, message } = req.body;
 
-    // Here, you could add functionality to send the data to an email, save it to a database, etc.
-    console.log(`Message received from ${name} (${email}): ${message}`);
+    try {
+        const newMessage = new Message({ name, email, message });
+        await newMessage.save(); // Save message to the database
 
-    res.send('Thank you for your message!'); // You can render a thank-you page or redirect back to /contact
+        console.log(`Message received from ${name} (${email}): ${message}`);
+        res.send('Thank you for your message!'); // Optionally, redirect or render a thank-you page
+
+    } catch (error) {
+        console.error('Error saving message:', error);
+        res.status(500).send('Server error');
+    }
 });
+
+
+router.get('/admin/messages', async (req, res) => {
+    try {
+        const messages = await Message.find().sort({ createdAt: -1 }); // Fetch messages from DB
+        res.render('admin-messages', { messages }); // Render the messages in a view
+    } catch (error) {
+        console.error('Error retrieving messages:', error);
+        res.status(500).send('Server error');
+    }
+});
+
 
 
 

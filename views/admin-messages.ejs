@@ -1,0 +1,6 @@
+<h1>Contact Messages</h1>
+<ul>
+    <% messages.forEach(function(message) { %>
+        <li><strong><%= message.name %></strong> (<%= message.email %>) said: <%= message.message %></li>
+    <% }); %>
+</ul>
